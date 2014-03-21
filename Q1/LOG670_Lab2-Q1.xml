@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?><!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_1.dtd'><nta><declaration>////////////////////////////////////
+//Définition des constante globale
+////////////////////////////////////
+// Limite de véhicule simultanément sur le pont
+const int CAPACITE_PONT = 3;
+// Quantité de véhicule à laisser passer avant de changer de direction
+const int EQUITE_VEHICULE = 5;
+// Temps avant de changer de direction
+const int EQUITE_TEMPS = 18; 
+// Nombre de véhicule à instancier
+const int NB_INSTANCES_VEH = 5;
+// Temps nécessaire pour traverser le pont
+const int TEMPS_TRAVERSER_PONT = 4; 
+
+////////////////////////////////////
+//Définition des types
+////////////////////////////////////
+//Type utiliser pour les identifiants unique des véhicules
+typedef int[0,NB_INSTANCES_VEH-1] id_vehicule;
+
+/////////////////////////////////////
+// Définition des variables globales
+/////////////////////////////////////
+// Nombre de véhicule actuellement sur le pont
+int[0,CAPACITE_PONT+1] nbVehiculeSurPont;
+
+/////////////////////////////////////
+// Définition des canaux globaux
+/////////////////////////////////////
+chan apprA[NB_INSTANCES_VEH];
+chan enterA[NB_INSTANCES_VEH];
+chan onBridgeA[NB_INSTANCES_VEH];
+chan stopA[NB_INSTANCES_VEH];
+chan leaveA[NB_INSTANCES_VEH];
+urgent chan goA[NB_INSTANCES_VEH];
+
+chan apprB[NB_INSTANCES_VEH];
+chan enterB[NB_INSTANCES_VEH];
+chan onBridgeB[NB_INSTANCES_VEH];
+chan stopB[NB_INSTANCES_VEH];
+chan leaveB[NB_INSTANCES_VEH];
+urgent chan goB[NB_INSTANCES_VEH];
+
+
+
+</declaration><template><name x="5" y="5">VAA</name><parameter>const id_vehicule id</parameter><declaration>// Horloge utilisée pour simuler le temps que prend un véhicule pour traverser le pont
+clock tempsTraverser;
+// Horloge utilisée pour calculer et vérifier le temps d'attente d'un véhicule
+clock tempsAttente;</declaration><location id="id0" x="304" y="8"><committed/></location><location id="id1" x="304" y="-152"><name x="320" y="-168">EstSurPont</name></location><location id="id2" x="56" y="96"><name x="32" y="104">Attente</name></location><location id="id3" x="152" y="8"><name x="112" y="-32">EntreSurPontA</name><committed/></location><location id="id4" x="-48" y="8"><name x="-128" y="0">Approche</name></location><location id="id5" x="-48" y="-152"><name x="-96" y="-168">Loin</name></location><init ref="id5"/><transition><source ref="id0"/><target ref="id1"/><label kind="synchronisation" x="312" y="-80">onBridgeA[id]!</label></transition><transition><source ref="id3"/><target ref="id0"/><label kind="synchronisation" x="192" y="8">enterA[id]!</label><label kind="assignment" x="168" y="24">tempsTraverser := 0</label></transition><transition><source ref="id1"/><target ref="id5"/><label kind="guard" x="-24" y="-200">tempsTraverser &gt;= TEMPS_TRAVERSER_PONT</label><label kind="synchronisation" x="88" y="-184">leaveA[id]!</label><nail x="24" y="-152"/></transition><transition><source ref="id2"/><target ref="id3"/><label kind="synchronisation" x="88" y="64">goA[id]?</label></transition><transition><source ref="id4"/><target ref="id2"/><label kind="synchronisation" x="-72" y="56">stopA[id]?</label></transition><transition><source ref="id4"/><target ref="id3"/><label kind="synchronisation" x="8" y="-16">goA[id]?</label></transition><transition><source ref="id5"/><target ref="id4"/><label kind="synchronisation" x="-120" y="-96">apprA[id]!</label><label kind="assignment" x="-168" y="-80">tempsAttente := 0</label></transition></template><template><name>VAB</name><parameter>const id_vehicule id</parameter><declaration>// Horloge utilisée pour simuler le temps que prend un véhicule pour traverser le pont
+clock tempsTraverser;
+// Horloge utilisée pour calculer et vérifier le temps d'attente d'un véhicule
+clock tempsAttente;
+</declaration><location id="id6" x="368" y="0"><committed/></location><location id="id7" x="368" y="-144"><name x="384" y="-152">EstSurPont</name></location><location id="id8" x="88" y="80"><name x="64" y="88">Attente</name></location><location id="id9" x="192" y="0"><name x="144" y="-32">EntreSurPontB</name><committed/></location><location id="id10" x="8" y="0"><name x="-72" y="-8">Approche</name></location><location id="id11" x="8" y="-144"><name x="-40" y="-152">Loin</name></location><init ref="id11"/><transition><source ref="id6"/><target ref="id7"/><label kind="synchronisation" x="376" y="-88">onBridgeB[id]!</label></transition><transition><source ref="id9"/><target ref="id6"/><label kind="synchronisation" x="248" y="0">enterB[id]!</label><label kind="assignment" x="224" y="16">tempsTraverser = 0</label></transition><transition><source ref="id7"/><target ref="id11"/><label kind="guard" x="32" y="-184">tempsTraverser &gt;= TEMPS_TRAVERSER_PONT</label><label kind="synchronisation" x="144" y="-168">leaveB[id]!</label><nail x="184" y="-144"/><nail x="120" y="-144"/></transition><transition><source ref="id10"/><target ref="id9"/><label kind="synchronisation" x="72" y="-24">goB[id]?</label></transition><transition><source ref="id8"/><target ref="id9"/><label kind="synchronisation" x="136" y="40">goB[id]?</label></transition><transition><source ref="id10"/><target ref="id8"/><label kind="synchronisation" x="-8" y="48">stopB[id]?</label></transition><transition><source ref="id11"/><target ref="id10"/><label kind="synchronisation" x="-64" y="-104">apprB[id]!</label><label kind="assignment" x="-112" y="-80">tempsAttente = 0</label></transition></template><template><name>CTRLP</name><declaration>////////////////////////////////////
+//Définition des variables de la classe
+////////////////////////////////////
+
+// Horloge utilisée pour s'assurer que le temps de chaque type soit équitable
+clock x;
+// Compteur de nombre de véhicule passé depuis le dernier changement de direction
+int nbVehiculePasse = 0;
+
+////////////////////////////////////
+//Définition des variables et fonctions pour la liste
+//d'attente de véhicule de type A
+////////////////////////////////////
+// Array pour la file d'attente des véhicule de type A
+id_vehicule listAttenteA[NB_INSTANCES_VEH+1];
+int[0,NB_INSTANCES_VEH] nbAttenteA;
+
+id_vehicule frontA() {
+     return listAttenteA[0];
+}
+
+id_vehicule tailA() {
+     return listAttenteA[nbAttenteA - 1];
+}
+
+// Ajouter un véhicule de type A à la file d'attente
+void enqueueA(id_vehicule id) {
+    listAttenteA[nbAttenteA++] = id;
+}
+
+void dequeueA() {
+    int i = 0;
+    ++nbVehiculePasse;
+    --nbAttenteA;
+
+    while (i &lt; nbAttenteA) {
+        listAttenteA[i] = listAttenteA[i + 1];
+        ++i;
+    }
+    
+    listAttenteA[i] = 0;
+}
+
+////////////////////////////////////
+//Définition des variables et fonctions pour la liste
+//d'attente de véhicule de type B
+////////////////////////////////////
+// Array pour la file d'attente pour véhicule de type B
+id_vehicule listAttenteB[NB_INSTANCES_VEH+1];
+
+int[0,NB_INSTANCES_VEH] nbAttenteB;
+
+id_vehicule frontB() {
+     return listAttenteB[0];
+}
+
+id_vehicule tailB() {
+     return listAttenteB[nbAttenteB - 1];
+}
+
+// Ajouter un véhicule de type B à la file d'attente
+void enqueueB(id_vehicule id) {
+    listAttenteB[nbAttenteB++] = id;
+}
+
+void dequeueB() {
+    int i = 0;
+    ++nbVehiculePasse;
+    --nbAttenteB;
+
+    while (i &lt; nbAttenteB) {
+        listAttenteB[i] = listAttenteB[i + 1];
+        ++i;
+    }
+    
+    listAttenteB[i] = 0;
+}
+
+////////////////////////////////////
+//Autres fonctions de la classe
+////////////////////////////////////
+
+// Remise à zéro des compteurs pour l'équité
+void reset() {
+    nbVehiculePasse = 0;
+    x = 0;
+}
+
+void startDirectionA(id_vehicule firstElement) {
+    reset();
+    enqueueA(firstElement);
+}
+
+void startDirectionB(id_vehicule firstElement) {
+    reset();
+    enqueueB(firstElement);
+}</declaration><location id="id12" x="-1592" y="-16"><label kind="invariant" x="-2032" y="-24">(nbVehiculePasse &lt; EQUITE_VEHICULE &amp;&amp; x &lt; EQUITE_TEMPS)</label><committed/></location><location id="id13" x="-1728" y="-160"><label kind="invariant" x="-2208" y="-176">nbAttenteB &gt; 0
+&amp;&amp; ((nbVehiculePasse &lt; EQUITE_VEHICULE &amp;&amp; x &lt; EQUITE_TEMPS) 
+     || nbAttenteA == 0)</label></location><location id="id14" x="-1256" y="-408"><name x="-1272" y="-448">EnChangementDeDirectionVersA</name><label kind="invariant" x="-1266" y="-393">nbAttenteA &gt; 0</label></location><location id="id15" x="-808" y="-96"><label kind="invariant" x="-792" y="-104">(nbVehiculePasse &lt; EQUITE_VEHICULE &amp;&amp; x &lt; EQUITE_TEMPS)</label><committed/></location><location id="id16" x="-920" y="-320"><label kind="invariant" x="-1040" y="-400">nbAttenteA &gt; 0
+&amp;&amp; ((nbVehiculePasse &lt; EQUITE_VEHICULE &amp;&amp; x &lt; EQUITE_TEMPS) 
+     || nbAttenteB == 0)</label></location><location id="id17" x="-1248" y="8"><name x="-1328" y="40">EnChangementDeDirectionVersB</name><label kind="invariant" x="-1296" y="24">nbAttenteB &gt; 0</label></location><location id="id18" x="-1496" y="-184"><name x="-1528" y="-216">DirectionB</name></location><location id="id19" x="-1016" y="-184"><name x="-1056" y="-248">DirectionA</name></location><location id="id20" x="-1256" y="-184"><name x="-1288" y="-216">Disponible</name><label kind="invariant" x="-1328" y="-272">nbVehiculeSurPont == 0</label></location><init ref="id20"/><transition><source ref="id18"/><target ref="id14"/><label kind="guard" x="-1448" y="-376">nbAttenteB == 0</label><nail x="-1456" y="-376"/></transition><transition><source ref="id19"/><target ref="id17"/><label kind="guard" x="-1176" y="-40">nbAttenteA == 0</label><nail x="-1064" y="-24"/></transition><transition><source ref="id12"/><target ref="id18"/><label kind="synchronisation" x="-1680" y="-72">stopA[tailA()]!</label><nail x="-1592" y="-72"/></transition><transition><source ref="id18"/><target ref="id12"/><label kind="select" x="-1548" y="-9">e : id_vehicule</label><label kind="synchronisation" x="-1548" y="12">apprA[e]?</label><label kind="assignment" x="-1580" y="28">enqueueA(e)</label><nail x="-1520" y="-8"/></transition><transition><source ref="id18"/><target ref="id18"/><label kind="select" x="-1720" y="-336">e : id_vehicule</label><label kind="guard" x="-2120" y="-288">((nbVehiculePasse &lt; EQUITE_VEHICULE &amp;&amp; x &lt; EQUITE_TEMPS) 
+     || nbAttenteA == 0)</label><label kind="synchronisation" x="-1720" y="-320">apprB[e]?</label><label kind="assignment" x="-1752" y="-305">enqueueB(e)</label><nail x="-1680" y="-288"/><nail x="-1704" y="-232"/></transition><transition><source ref="id13"/><target ref="id18"/><label kind="synchronisation" x="-1672" y="-144">onBridgeB[frontB()]?</label><label kind="assignment" x="-1656" y="-128">dequeueB()</label><nail x="-1712" y="-128"/></transition><transition><source ref="id18"/><target ref="id13"/><label kind="guard" x="-1832" y="-192">nbVehiculeSurPont &lt; CAPACITE_PONT</label><label kind="synchronisation" x="-1736" y="-208">goB[frontB()]!</label></transition><transition><source ref="id18"/><target ref="id14"/><label kind="guard" x="-1688" y="-448">nbVehiculePasse &gt;= EQUITE_VEHICULE || x &gt; EQUITE_TEMPS</label><nail x="-1496" y="-408"/></transition><transition><source ref="id14"/><target ref="id19"/><label kind="guard" x="-1232" y="-328">nbVehiculeSurPont == 0</label><label kind="assignment" x="-1184" y="-312">reset()</label></transition><transition><source ref="id18"/><target ref="id20"/><label kind="guard" x="-1392" y="-144">nbAttenteA == 0 
+&amp;&amp; nbAttenteB == 0</label><nail x="-1336" y="-144"/></transition><transition><source ref="id15"/><target ref="id19"/><label kind="synchronisation" x="-976" y="-72">stopB[tailB()]!</label><nail x="-944" y="-72"/></transition><transition><source ref="id16"/><target ref="id19"/><label kind="synchronisation" x="-1040" y="-296">onBridgeA[frontA()]?</label><label kind="assignment" x="-1008" y="-280">dequeueA()</label></transition><transition><source ref="id19"/><target ref="id15"/><label kind="select" x="-864" y="-168">e : id_vehicule</label><label kind="synchronisation" x="-864" y="-152">apprB[e]?</label><label kind="assignment" x="-864" y="-136">enqueueB(e)</label><nail x="-936" y="-152"/><nail x="-904" y="-136"/></transition><transition><source ref="id19"/><target ref="id20"/><label kind="guard" x="-1208" y="-128">nbAttenteA == 0 
+&amp;&amp; nbAttenteB == 0</label><nail x="-1144" y="-128"/></transition><transition><source ref="id19"/><target ref="id16"/><label kind="guard" x="-888" y="-296">nbVehiculeSurPont &lt; CAPACITE_PONT</label><label kind="synchronisation" x="-880" y="-312">goA[frontA()]!</label><nail x="-888" y="-288"/><nail x="-888" y="-296"/></transition><transition><source ref="id19"/><target ref="id17"/><label kind="guard" x="-1152" y="16">nbVehiculePasse &gt;= EQUITE_VEHICULE || x &gt; EQUITE_TEMPS</label><nail x="-1016" y="8"/></transition><transition><source ref="id17"/><target ref="id18"/><label kind="guard" x="-1496" y="-64">nbVehiculeSurPont == 0</label><label kind="assignment" x="-1432" y="-40">reset()</label></transition><transition><source ref="id19"/><target ref="id19"/><label kind="select" x="-840" y="-264">e : id_vehicule</label><label kind="guard" x="-880" y="-216">((nbVehiculePasse &lt; EQUITE_VEHICULE &amp;&amp; x &lt; EQUITE_TEMPS) 
+     || nbAttenteB == 0)</label><label kind="synchronisation" x="-840" y="-248">apprA[e]?</label><label kind="assignment" x="-880" y="-232">enqueueA(e)</label><nail x="-888" y="-240"/><nail x="-892" y="-192"/></transition><transition><source ref="id20"/><target ref="id18"/><label kind="select" x="-1432" y="-255">e : id_vehicule</label><label kind="guard" x="-1432" y="-240">nbVehiculeSurPont == 0</label><label kind="synchronisation" x="-1432" y="-225">apprB[e]?</label><label kind="assignment" x="-1432" y="-210">startDirectionB(e)</label></transition><transition><source ref="id20"/><target ref="id19"/><label kind="select" x="-1168" y="-256">e : id_vehicule</label><label kind="guard" x="-1208" y="-240">nbVehiculeSurPont == 0</label><label kind="synchronisation" x="-1168" y="-224">apprA[e]?</label><label kind="assignment" x="-1184" y="-208">startDirectionA(e)</label></transition></template><template><name>P</name><location id="id21" x="-1104" y="-32"><name x="-1160" y="0">OccupeDirectionB</name></location><location id="id22" x="-528" y="-32"><name x="-576" y="0">OccupeDirectionA</name></location><location id="id23" x="-824" y="-32"><name x="-840" y="-64">Vide</name><label kind="invariant" x="-896" y="-80">nbVehiculeSurPont == 0</label></location><init ref="id23"/><transition><source ref="id21"/><target ref="id21"/><label kind="select" x="-1304" y="33">e : id_vehicule</label><label kind="guard" x="-1304" y="48">nbVehiculeSurPont &gt; 1</label><label kind="synchronisation" x="-1304" y="63">leaveB[e]?</label><label kind="assignment" x="-1304" y="80">--nbVehiculeSurPont</label><nail x="-1248" y="24"/><nail x="-1248" y="-32"/></transition><transition><source ref="id21"/><target ref="id21"/><label kind="select" x="-1304" y="-167">e : id_vehicule</label><label kind="guard" x="-1304" y="-152">nbVehiculeSurPont &lt;= CAPACITE_PONT</label><label kind="synchronisation" x="-1304" y="-137">enterB[e]?</label><label kind="assignment" x="-1304" y="-122">++nbVehiculeSurPont</label><nail x="-1248" y="-88"/><nail x="-1248" y="-32"/></transition><transition><source ref="id21"/><target ref="id23"/><label kind="select" x="-1000" y="33">e : id_vehicule</label><label kind="synchronisation" x="-1000" y="49">leaveB[e]?</label><label kind="assignment" x="-1032" y="64">--nbVehiculeSurPont</label><nail x="-968" y="32"/></transition><transition><source ref="id23"/><target ref="id21"/><label kind="select" x="-1000" y="-144">e : id_vehicule</label><label kind="synchronisation" x="-1000" y="-128">enterB[e]?</label><label kind="assignment" x="-1032" y="-114">++nbVehiculeSurPont</label><nail x="-968" y="-88"/></transition><transition><source ref="id22"/><target ref="id22"/><label kind="select" x="-400" y="32">e : id_vehicule</label><label kind="guard" x="-432" y="48">nbVehiculeSurPont &gt; 1</label><label kind="synchronisation" x="-400" y="64">leaveA[e]?</label><label kind="assignment" x="-432" y="80">--nbVehiculeSurPont</label><nail x="-368" y="-32"/><nail x="-368" y="32"/></transition><transition><source ref="id22"/><target ref="id23"/><label kind="select" x="-696" y="40">e : id_vehicule</label><label kind="synchronisation" x="-696" y="56">leaveA[e]?</label><label kind="assignment" x="-736" y="72">--nbVehiculeSurPont</label><nail x="-664" y="32"/></transition><transition><source ref="id22"/><target ref="id22"/><label kind="select" x="-408" y="-168">e : id_vehicule</label><label kind="guard" x="-488" y="-152">nbVehiculeSurPont &lt;= CAPACITE_PONT</label><label kind="synchronisation" x="-408" y="-136">enterA[e]?</label><label kind="assignment" x="-440" y="-120">++nbVehiculeSurPont</label><nail x="-368" y="-32"/><nail x="-368" y="-96"/></transition><transition><source ref="id23"/><target ref="id22"/><label kind="select" x="-696" y="-144">e : id_vehicule</label><label kind="synchronisation" x="-696" y="-128">enterA[e]?</label><label kind="assignment" x="-736" y="-112">++nbVehiculeSurPont</label><nail x="-664" y="-88"/></transition></template><system>system VAA, VAB, CTRLP, P;</system></nta>
